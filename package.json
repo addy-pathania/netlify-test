@@ -5,8 +5,13 @@
   "main": "index.js",
   "scripts": {
     "build": "cd ./proxy && npm run build-all && cd ..",
-   "install": "cd ./proxy && npm run install-all && cd .."
+   "install": "cd ./proxy && npm run install-all && cd ..",
+    "netlify-init": "netlify init",
+    "deploy-netlify": "netlify build && netlify deploy --prod"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+        "netlify-cli": "^17.36.2"
+    }
 }
