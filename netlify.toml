@@ -15,3 +15,4 @@
 [build]
   command = "npm run build"
   publish = "node-xmcloud-proxy/dist"
+
