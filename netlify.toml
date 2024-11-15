@@ -1,7 +1,7 @@
 ﻿[functions]
-  directory = "proxy/src"
+  directory = "node-xmcloud-proxy/src"
   node_bundler = "esbuild"
-  included_files = ["proxy/dist/**"]
+  included_files = ["node-xmcloud-proxy/dist/**"]
 [[redirects]]
   from = "/dist/browser/*"
   status = 200
@@ -13,4 +13,4 @@
   force = true
 [build]
   command = "npm run build"
-  publish = "proxy/dist"
+  publish = "node-xmcloud-proxy/dist"
