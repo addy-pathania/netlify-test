@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "ts-node ./src/index.ts",
-    "build-all": "cd ../angular && npm run build && cd ../node-xmcloud-proxy && tsc",
+    "build-all": "cd ../angular && npm run build && cd ../node-xmcloud-proxy && npx tsc",
     "install-all": "cd ../angular && npm i && cd ../node-xmcloud-proxy"
   },
   "dependencies": {
