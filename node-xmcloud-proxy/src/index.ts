@@ -1,11 +1,12 @@
-import 'dotenv/config';
-import express, { Response } from 'express';
-import compression from 'compression';
-import { createProxyMiddleware, fixRequestBody } from 'http-proxy-middleware';
-import { debug } from '@sitecore-jss/sitecore-jss';
-import { editingRouter, healthCheck } from '@sitecore-jss/sitecore-jss-proxy';
-import { config, graphQLEndpoint } from './config';
-import { personalizeHelper, personalizePlugin } from './personalize';
+import "dotenv/config";
+import express, { Response } from "express";
+import compression from "compression";
+import { createProxyMiddleware, fixRequestBody } from "http-proxy-middleware";
+import { debug } from "@sitecore-jss/sitecore-jss";
+import { editingRouter, healthCheck } from "@sitecore-jss/sitecore-jss-proxy";
+import { config, graphQLEndpoint } from "./config";
+import { personalizeHelper, personalizePlugin } from "./personalize";
+import serverless from "serverless-http";
 
 const server = express();
 
@@ -20,23 +21,25 @@ const {
  * Required server bundle properties
  */
 const requiredProperties = [
-  'renderView',
-  'parseRouteUrl',
-  'clientFactory',
-  'getClientFactoryConfig',
-  'defaultLanguage',
-  'layoutServiceFactory',
-  'dictionaryServiceFactory',
-  'components',
-  'metadata',
+  "renderView",
+  "parseRouteUrl",
+  "clientFactory",
+  "getClientFactoryConfig",
+  "defaultLanguage",
+  "layoutServiceFactory",
+  "dictionaryServiceFactory",
+  "components",
+  "metadata",
 ];
 
-const missingProperties = requiredProperties.filter((property) => !config.serverBundle[property]);
+const missingProperties = requiredProperties.filter(
+  (property) => !config.serverBundle[property]
+);
 
 if (missingProperties.length > 0) {
   throw new Error(
     `ERROR: The serverBundle should export the following properties: ${missingProperties.join(
-      ', '
+      ", "
     )}. Please check your server bundle.`
   );
 }
@@ -55,13 +58,13 @@ const getRouteParams = (reqRoute: string) => {
   let route;
 
   if (routeParams) {
-    route = routeParams.sitecoreRoute || '/';
+    route = routeParams.sitecoreRoute || "/";
 
-    if (!route.startsWith('/')) {
+    if (!route.startsWith("/")) {
       route = `/${route}`;
     }
 
-    lang = routeParams.lang || '';
+    lang = routeParams.lang || "";
   }
 
   return { route, lang };
@@ -73,9 +76,9 @@ const getRouteParams = (reqRoute: string) => {
  * @param {Error} err error
  */
 const handleError = (res: Response, err: unknown) => {
-  debug.proxy('response error %o', err);
+  debug.proxy("response error %o", err);
 
-  res.status(500).send('Internal Server Error');
+  res.status(500).send("Internal Server Error");
 };
 
 // enable gzip compression for appropriate file types
@@ -84,12 +87,12 @@ server.use(compression());
 server.use(graphQLEndpoint.path, express.json());
 
 // turn off x-powered-by http header
-server.settings['x-powered-by'] = false;
+server.settings["x-powered-by"] = false;
 
 // Serve static app assets from local /dist folder
 server.use(
-  '/dist',
-  express.static('dist', {
+  "/dist",
+  express.static("dist", {
     fallthrough: false, // force 404 for unknown assets under /dist
   })
 );
@@ -120,7 +123,7 @@ server.use(healthCheck());
  * Proxy editing requests through the editing router
  */
 server.use(
-  '/api/editing',
+  "/api/editing",
   editingRouter({
     config: {
       components: config.serverBundle.components,
@@ -140,7 +143,7 @@ server.use(async (req, res) => {
     const { route, lang } = getRouteParams(req.originalUrl);
 
     if (!route) {
-      debug.proxy('no route detected, returning 404');
+      debug.proxy("no route detected, returning 404");
 
       res.sendStatus(404);
 
@@ -153,16 +156,14 @@ server.use(async (req, res) => {
       lang || config.serverBundle.defaultLanguage
     );
     // for SSR loading routing, personalization is performed by modifying layoutData directly
-    const personalizedLayoutData = await personalizeHelper.personalizeLayoutData(
-      req,
-      res,
-      layoutData
-    );
+    const personalizedLayoutData =
+      await personalizeHelper.personalizeLayoutData(req, res, layoutData);
     layoutData = personalizedLayoutData;
     const viewBag = { dictionary: {} };
 
     viewBag.dictionary = await dictionaryService.fetchDictionaryData(
-      layoutData.sitecore.context.language || config.serverBundle.defaultLanguage
+      layoutData.sitecore.context.language ||
+        config.serverBundle.defaultLanguage
     );
 
     renderView(
@@ -173,7 +174,7 @@ server.use(async (req, res) => {
         }
 
         if (!result) {
-          debug.proxy('no result returned from renderView, returning 204');
+          debug.proxy("no result returned from renderView, returning 204");
 
           res.status(204).send();
           return;
@@ -181,7 +182,7 @@ server.use(async (req, res) => {
 
         const statusCode = layoutData.sitecore.route ? 200 : 404;
 
-        debug.proxy('sending response with status %s', statusCode);
+        debug.proxy("sending response with status %s", statusCode);
 
         res.status(statusCode).send(result.html);
       },
@@ -197,3 +198,5 @@ server.use(async (req, res) => {
 server.listen(config.port, () => {
   console.log(`server listening on port ${config.port}!`);
 });
+
+export const handler = serverless(server);
