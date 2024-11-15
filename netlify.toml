@@ -1,4 +1,5 @@
-﻿[functions]
+﻿
+[functions]
   directory = "node-xmcloud-proxy/src"
   node_bundler = "esbuild"
   included_files = ["node-xmcloud-proxy/dist/**"]
