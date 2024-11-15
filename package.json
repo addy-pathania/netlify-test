@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "cd ./proxy && npm run build-all && cd ..",
-   "install": "cd ./proxy && npm run install-all && cd ..",
+    "build": "cd ./node-xmcloud-proxy && npm run build-all && cd ..",
+   "install": "cd ./node-xmcloud-proxy && npm run install-all && cd ..",
     "netlify-init": "netlify init",
     "deploy-netlify": "netlify build && netlify deploy --prod"
   },
